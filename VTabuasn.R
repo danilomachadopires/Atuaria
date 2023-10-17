@@ -94,8 +94,6 @@ dotalP<-function(i,idade,n,b,tabua){
 }
 
 #  xm é a idade em que vai se aposentar
-#tabua<-tabua$AT_49_qx
-#i<-0.03;x<-80;t<-30;b<-1;xm<-70
 Pr<-function(i,x,xm,b,tabua){
   q<-tabua
   m<-xm-x
@@ -105,10 +103,6 @@ Pr<-function(i,x,xm,b,tabua){
 }
 
 
-#tabua<-tabua$AT_49_qx
-#i<-0.03;x<-80;t<-30;b<-1;xm<-70
-#pr<-Pr(i,x,xm,b,tabua)
-
 #  xm é a idade em que x vai se aposentar
 Reserva <-function(i,x,tabua,xm,t,b){
   qq <-tabua
@@ -116,15 +110,32 @@ Reserva <-function(i,x,tabua,xm,t,b){
   if(t<m){
        Vr <- dotalP(i,(x+t),(m-t),b,qq)*anx(i,xm,((length(qq)-1)-xm),b,qq)-pr*anx(i,(x+t),(m-t),b,qq)
   } else{
-    Vr <- anx(i,(x+t),((length(qq)-1)-(x+t)),b,qq)
+       Vr <- anx(i,(x+t),((length(qq)-1)-(x+t)),b,qq)
   }
   return(Vr)
 }
 
 
+#----------------------------------------------------------------
+PNI = (f_anuidade(idade=65, i=0.2, lx=tabua$lx, benef=1, postec = FALSE, temp=NA, dif=5))/
+       f_anuidade(idade=65, i=0.2, lx=tabua$lx, benef=1, postec = FALSE, temp=5, dif=NA)
+pr<-Pr(0.2,65,70,1,tabua$qx)
+PNI;pr
+# m=5, t=4, x=65
+V4 =  (f_anuidade(idade=69, i=0.2, lx=tabua$lx, benef=1, postec = FALSE, temp=NA, dif=1)) - 
+       PNI*f_anuidade(idade=69, i=0.2, lx=tabua$lx, benef=1, postec = FALSE, temp=1, dif=NA)
+
+V4;Reserva(0.2,65,tabua$qx,70,4,1)
+
+#------------------------------------------------------------------------
+
+
+
+
+
 #----------------------------------------------------------
 id    <- 35:65        # variar a idade inicial
-tempo <- 0:81         # Tempo passado
+tempo <- 0:81         # Tempo passado   ( ajustar o tempo para que não ultrapasse a tabua)
 nome_do_arquivo <- "dados1.txt"
 arquivo         <- file(nome_do_arquivo, "w") # Abrir o arquivo para escrita
 
@@ -133,12 +144,12 @@ arquivo         <- file(nome_do_arquivo, "w") # Abrir o arquivo para escrita
   
 for(Id in 1:length(id)){   # IDADES
   
-  pr  <- Pr(0.03,id[Id],70,1,tabua$AT_49_qx)
+  pr  <- Pr(0.2,id[Id],70,1,tabua$AT_49_qx)
   aux <- aux+1
   
   for (j in 1:length(tempo)){
   
-  V <- Reserva(0.03,id[Id],tabua$AT_49_qx,70,tempo[j],1)
+  V <- Reserva(0.2,id[Id],tabua$AT_49_qx,70,tempo[j],1)
   
   if(!is.na(V)){
     
@@ -161,14 +172,16 @@ close(arquivo)
 
 
 
-Vr<-(0:80)*0
-Vr[1]=0
+Vr<-(1:80)*0
+
+ Reserva(0.03,35,tabua$qx,70,36,1)
+ anx(0.03,71,(max(tabua$Idades)-71),1,tabua$qx)
 
 
-pr<-Pr(0.03,35,70,1,tabua$AT_49_qx)
+pr<-Pr(0.2,35,70,1,tabua$qx)
 
-for (i in 1:80){
-  Vr[i+1]= Reserva(0.03,35,tabua$AT_49_qx,70,i,1)
+for (t in 1:80){
+  Vr[t]= Reserva(0.2,35,tabua$qx,70,t,1)
 }
 plot(Vr,type='b',ylab="Reserva",xlab="tempo",lwd=2)
 
