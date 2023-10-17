@@ -57,29 +57,16 @@ par(new=T)
 plot(Vrv,type='l',col='red',ylim=c(0,1),ylab="Reserva",xlab="tempo",lwd=2)
 
 #----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+#-----------------------------------------------------GRÁFICOS DE RESERVAS
+
 rm(list=ls(all=T))
 
-tabuas<- read.table('Tabuas.txt', header=T)
-attach(tabuas)
+tabua<- read.table('Tabuas.txt', header=T)
+attach(tabua)
 
-
-Axn<-function( i, idade, n,b,tabua)  { 
-  
-  qx<-tabua
-  px<-1-qx
-  v <- (1/(i+1))^(1:n)                                
-  pxx <- c(1, cumprod( px[(idade+1):(idade+n-1)]) )
-  if(n==1){
-    pxx<-1
-  }
-  qxx <- c(qx[(idade+1):(idade+n)])
-  
-  Axn <- b* sum(v*pxx*qxx)
-  if(n==0){
-    Axn<-0
-  }
-  return (Axn)
-}
 
 anx<-function(i,idade,n,b,tabua){
   v       <- 1/(1+i) 
@@ -93,81 +80,99 @@ anx<-function(i,idade,n,b,tabua){
   if(n==0){
     anx<-0
   }
+  if(n<0){anx=0}
   return(anx)
 }
 
 dotalP<-function(i,idade,n,b,tabua){
   px<-1-tabua
   V <- 1/(i+1)^n
-  npx <- prod( px[(idade+1):(idade+n)]) 
-  Dt<- V*npx*b
+  npx <- prod( px[(idade+1):(idade+n)])
+   Dt <- V*npx*b
+   if(n<0){Dt=0}
   return(Dt)
 }
 
-
-
-i<-0.03; x=30; m=10; n=5
-
-p<-(dotalP(i,x,m,1,tabuas$AT_49_qx)*anx(i,x+m,(max(tabuas$Idade)-x-m),1,tabuas$AT_49_qx))/anx(i,x,m,1,tabuas$AT_49_qx)
-
-
-
-Vr<-Vrv<-(0:10)*0
-
-Vr[1]=Vrv[1]=0
-
-for (i in 1:10){
-  
-  Vr[i+1]=Axn(0.03,(10+i),(10-i),1,tabuas$AT_49_qx)-p*anx(0.03,10+i,10-i,1,tabuas$AT_49_qx)
-  Vrv[i+1]=(Axn(0.03,20+i,10-i,1,tabuas$AT_49_qx)+0.005*anx(0.03,1+i,10-i,1,tabuas$AT_49_qx))-(p)*anx(0.03,1+i,10-i,1,tabuas$AT_49_qx)
-  
+#  xm é a idade em que vai se aposentar
+#tabua<-tabua$AT_49_qx
+#i<-0.03;x<-80;t<-30;b<-1;xm<-70
+Pr<-function(i,x,xm,b,tabua){
+  q<-tabua
+  m<-xm-x
+  pr<-(dotalP(i,x,m,1,q)*anx(i,xm, ((length(q)-1)-(xm)),1,q))/anx(i,x,m,1,q)
+  if(pr=='NaN'){pr<-0}
+  return(pr)
 }
 
-plot(Vr,type='b',ylab="Reserva",xlab="tempo",lwd=2,ylim=c(0,0.01))
-par(new=T)
-plot(Vrv,type='l',col='red',ylab="Reserva",xlab="tempo",lwd=2,ylim=c(0,0.15))
 
+#tabua<-tabua$AT_49_qx
+#i<-0.03;x<-80;t<-30;b<-1;xm<-70
+#pr<-Pr(i,x,xm,b,tabua)
 
-
-
-
-# 1) Variar a taxa de juros
-# 2) Variar o tempo passado
-# 3) para uma idade fixa do segurado, obter a reserva e diferentes taxas de juros em diferentes momentos
-# 4) um eixo vai ser a taxa de juros, outro vai ser o tempo passado e outro vai ser a reserva
-# 5) normalmente temos somente a reserva por tempo passado. 
-# 
-# 
-# 
-
-  J  <- seq(0.01,0.05,len=100)
-  id <- 35:60
-  nome_do_arquivo <- "dadosn.txt"
-  
-
-
-arquivo <- file(nome_do_arquivo, "w")
-  aux<-1
-  for(i in 1:100){
-    for (j in 1:26){
-
-Pr<-(dotalP(J,id,m,1,tabuas$AT_49_qx)*anx(J,id+m,(max(tabuas$Idade)-x-m),1,tabuas$AT_49_qx))/anx(i,x,m,1,tabuas$AT_49_qx)     
-      
-      linha <- paste(J[i],id[j],5*log(x[i])-5*x[i]*log(y[j])+(x[i]-1)*sum(log(W))-(1/(y[j]^x[i]))*sum(W^x[i]), collapse = "\t") # Separador de tabulação (\t) entre as colunas
-      cat(linha, file = arquivo)
-      cat("\n", file = arquivo)
-      aux<-aux+1 
-    }
-    cat("\n", file = arquivo)
-    #write.table( "",row.names = F, col.names = F,file="dadosn.txt",append = TRUE)
+#  xm é a idade em que x vai se aposentar
+Reserva <-function(i,x,tabua,xm,t,b){
+  qq <-tabua
+  m  <-(xm-x)
+  if(t<m){
+       Vr <- dotalP(i,(x+t),(m-t),b,qq)*anx(i,xm,((length(qq)-1)-xm),b,qq)-pr*anx(i,(x+t),(m-t),b,qq)
+  } else{
+    Vr <- anx(i,(x+t),((length(qq)-1)-(x+t)),b,qq)
   }
+  return(Vr)
+}
 
-  close(arquivo)
+
+#----------------------------------------------------------
+id    <- 35:65        # variar a idade inicial
+tempo <- 0:81         # Tempo passado
+nome_do_arquivo <- "dados1.txt"
+arquivo         <- file(nome_do_arquivo, "w") # Abrir o arquivo para escrita
+
+
+  aux <- 0
   
+for(Id in 1:length(id)){   # IDADES
   
+  pr  <- Pr(0.03,id[Id],70,1,tabua$AT_49_qx)
+  aux <- aux+1
   
+  for (j in 1:length(tempo)){
   
+  V <- Reserva(0.03,id[Id],tabua$AT_49_qx,70,tempo[j],1)
   
+  if(!is.na(V)){
+    
+  linha <- paste(id[Id],tempo[j],V,collapse = "\t") 
+  # Separador de tabulação (\t) entre as colunas
+  
+    cat(linha, file = arquivo)
+    cat("\n", file = arquivo)}
+  
+}
+  cat("\n", file = arquivo)
+  aux<-aux+1 
+  
+ }
+
+close(arquivo)
+
+
+
+
+
+
+Vr<-(0:80)*0
+Vr[1]=0
+
+
+pr<-Pr(0.03,35,70,1,tabua$AT_49_qx)
+
+for (i in 1:80){
+  Vr[i+1]= Reserva(0.03,35,tabua$AT_49_qx,70,i,1)
+}
+plot(Vr,type='b',ylab="Reserva",xlab="tempo",lwd=2)
+
+
 # Colocar no livro do leandro  
   n<-0:3
   p<-dbinom(n,3,0.6)
