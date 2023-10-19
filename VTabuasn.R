@@ -67,7 +67,8 @@ rm(list=ls(all=T))
 tabua<- read.table('Tabuas.txt', header=T)
 attach(tabua)
 
-
+#  O código do R faz arrendondamentos, pois usa a coluna lx e não a q
+# motivo da suavição do grafico. 
 anx<-function(i,idade,n,b,tabua){
   v       <- 1/(1+i) 
   px     <- 1-tabua
@@ -167,7 +168,7 @@ for(Id in 1:length(id)){   # IDADES
 
 close(arquivo)
 
-
+par(mfrow = c(1, 2)) 
 
 
 
@@ -178,12 +179,12 @@ Vr<-(1:80)*0
  anx(0.03,71,(max(tabua$Idades)-71),1,tabua$qx)
 
 
-pr<-Pr(0.2,35,70,1,tabua$qx)
+pr<-Pr(0.03,35,70,1,tabua$qx)
 
 for (t in 1:80){
-  Vr[t]= Reserva(0.2,35,tabua$qx,70,t,1)
+  Vr[t]= Reserva(0.03,35,tabua$qx,70,t,1)
 }
-plot(Vr,type='b',ylab="Reserva",xlab="tempo",lwd=2)
+plot(Vr,type='l',ylab="Reserva",xlab="tempo",lwd=2)
 
 
 # Colocar no livro do leandro  

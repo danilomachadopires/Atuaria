@@ -1,0 +1,64 @@
+
+
+#set ticslevel 0
+#set pm3d map
+#set palette defined (0 "white", 1 "black")
+#set xlabel "x"
+#set ylabel "u(t,x)"
+#set terminal png 
+#set  output 'order.png'
+#splot 'order.gnu' with pm3d t""
+#reset
+
+set ticslevel 0
+set pm3d map
+set palette defined (0 "white", 1 "black")
+set xlabel "X" font "Times-Roman,15"
+set ylabel "u(x,t)" font "Times-Roman,15"
+set xtics font ", 15"
+set ytics font ", 15"
+set key font ",20"
+set xr [30:90]
+set key spacing 3
+splot 'aposalgoritmo.gnu' with pm3d t""
+set terminal png 
+set output 'fim.png'
+reset
+
+set ticslevel 0
+set palette defined (0 "white", 1 "black")
+set xlabel "X" font "Times-Roman,15"
+set ylabel "u(x,t)" font "Times-Roman,15"
+set xtics font ", 15"
+set ytics font ", 15"
+set key font ",20"
+set xr [30:90]
+set key spacing 3
+splot 'aposalgoritmo.gnu' with pm3d t""
+set  output 'fim3d.png'
+set terminal png 
+reset
+
+set  output 'classico.png'
+set xlabel "x"
+set ylabel "t"
+set zlabel "u(t,x)"
+splot 'sclassica.gnu'
+reset
+
+
+set  output 'classicoCrisp.png'
+set xlabel "x"
+set ylabel "u(t,x)"
+plot 'classica.gnu' with l t"Classic" ,'defu.gnu' with l t"Defuzz."  
+reset
+
+
+set xlabel "X" font "Times-Roman,15"
+set ylabel "u(x,t)" font "Times-Roman,15"
+set xtics font ", 15"
+set ytics font ", 15"
+set key font ",20"
+set xr [30:90]
+set key spacing 3
+plot 'classica.gnu' with l t"Classic" lw 2 linecolor rgb "orange" ,'defu.gnu' with l t"Triple (1,8;2;2,2)" lw 2 linecolor rgb "blue", 'defu_d.gnu' with l t"Triple (2;2;2,2)" lw 2 linecolor rgb "red", 'defu_e.gnu' with l t"Triple (1,8;2;2)" lw 2 linecolor rgb "black"
