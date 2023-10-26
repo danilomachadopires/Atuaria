@@ -10,6 +10,9 @@
 #splot 'order.gnu' with pm3d t""
 #reset
 
+plot "dados.txt" using 1:3 with linespoints
+
+
 set ticslevel 0
 set pm3d map
 set palette defined (0 "white", 1 "black")

@@ -78,12 +78,15 @@ anx<-function(i,idade,n,b,tabua){
   }
   t        <- (0:(length(pxx)-1))
   anx     <- b*sum(v^(t)*pxx)
-  if(n==0){
+  if(n<=0){
     anx<-0
   }
-  if(n<0){anx=0}
+
   return(anx)
 }
+
+
+
 
 dotalP<-function(i,idade,n,b,tabua){
   px<-1-tabua
@@ -118,15 +121,14 @@ Reserva <-function(i,x,tabua,xm,t,b){
 
 
 #----------------------------------------------------------------
-PNI = (f_anuidade(idade=65, i=0.2, lx=tabua$lx, benef=1, postec = FALSE, temp=NA, dif=5))/
-       f_anuidade(idade=65, i=0.2, lx=tabua$lx, benef=1, postec = FALSE, temp=5, dif=NA)
-pr<-Pr(0.2,65,70,1,tabua$qx)
-PNI;pr
+#PNI = (f_anuidade(idade=65, i=0.2, lx=tabua$lx, benef=1, postec = FALSE, temp=NA, dif=5))/
+#       f_anuidade(idade=65, i=0.2, lx=tabua$lx, benef=1, postec = FALSE, temp=5, dif=NA)
+#pr<-Pr(0.2,65,70,1,tabua$qx)
+#PNI;pr
 # m=5, t=4, x=65
-V4 =  (f_anuidade(idade=69, i=0.2, lx=tabua$lx, benef=1, postec = FALSE, temp=NA, dif=1)) - 
-       PNI*f_anuidade(idade=69, i=0.2, lx=tabua$lx, benef=1, postec = FALSE, temp=1, dif=NA)
-
-V4;Reserva(0.2,65,tabua$qx,70,4,1)
+#V4 =  (f_anuidade(idade=69, i=0.2, lx=tabua$lx, benef=1, postec = FALSE, temp=NA, dif=1)) - 
+#       PNI*f_anuidade(idade=69, i=0.2, lx=tabua$lx, benef=1, postec = FALSE, temp=1, dif=NA)
+#V4;Reserva(0.2,65,tabua$qx,70,4,1)
 
 #------------------------------------------------------------------------
 
@@ -136,27 +138,27 @@ V4;Reserva(0.2,65,tabua$qx,70,4,1)
 
 #----------------------------------------------------------
 id    <- 35:65        # variar a idade inicial
-tempo <- 0:81         # Tempo passado   ( ajustar o tempo para que não ultrapasse a tabua)
-nome_do_arquivo <- "dados1.txt"
+tempo <- 0:45         # Tempo passado   ( ajustar o tempo para que não ultrapasse a tabua)
+nome_do_arquivo <- "dados2.txt"
 arquivo         <- file(nome_do_arquivo, "w") # Abrir o arquivo para escrita
 
 
-  aux <- 0
+   aux <- 0
+     q <-tabua$AT_49_qx
+     q <-c(q[q<1],1)
   
 for(Id in 1:length(id)){   # IDADES
   
-  pr  <- Pr(0.2,id[Id],70,1,tabua$AT_49_qx)
+  pr  <- Pr(0.2,id[Id],70,1,q)
   aux <- aux+1
   
   for (j in 1:length(tempo)){
   
-  V <- Reserva(0.2,id[Id],tabua$AT_49_qx,70,tempo[j],1)
+  V <- Reserva(0.2,id[Id],q,70,tempo[j],1)
   
   if(!is.na(V)){
     
-  linha <- paste(id[Id],tempo[j],V,collapse = "\t") 
-  # Separador de tabulação (\t) entre as colunas
-  
+  linha <- paste(id[Id],tempo[j],V,collapse = "\t")  # Separador de tabulação (\t) entre as colunas
     cat(linha, file = arquivo)
     cat("\n", file = arquivo)}
   
